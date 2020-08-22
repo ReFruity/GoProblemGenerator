@@ -1,0 +1,7 @@
+#define PACHI_GIT_BRANCH   "master"
+#define PACHI_GIT_HASH     "38fba7ac"
+#define PACHI_BUILD_DATE   "авг 22 2020"
+#define PACHI_BUILD_TARGET "haswell"
+#define PACHI_CFLAGS       "-Wall -ggdb3 -O3 -D_GNU_SOURCE -frename-registers -DDATA_DIR=/usr/share/pachi-go -march=native -DDCNN -DDCNN_DETLEF -DDCNN_DARKFOREST -fomit-frame-pointer -std=gnu99 -pthread -Wsign-compare -Wno-format-zero-length   "
+#define PACHI_COMPILER     "cc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0"
+#define PACHI_CC1          " /usr/lib/gcc/x86_64-linux-gnu/7/cc1 -E -quiet -v -imultiarch x86_64-linux-gnu -dD -D_REENTRANT -D _GNU_SOURCE -D DATA_DIR=/usr/share/pachi-go -D DCNN -D DCNN_DETLEF -D DCNN_DARKFOREST - -march=haswell -mmmx -mno-3dnow -msse -msse2 -msse3 -mssse3 -mno-sse4a -mcx16 -msahf -mmovbe -maes -mno-sha -mpclmul -mpopcnt -mabm -mno-lwp -mfma -mno-fma4 -mno-xop -mbmi -mno-sgx -mbmi2 -mno-tbm -mavx -mavx2 -msse4.2 -msse4.1 -mlzcnt -mno-rtm -mno-hle -mrdrnd -mf16c -mfsgsbase -mno-rdseed -mno-prfchw -mno-adx -mfxsr -mxsave -mxsaveopt -mno-avx512f -mno-avx512er -mno-avx512cd -mno-avx512pf -mno-prefetchwt1 -mno-clflushopt -mno-xsavec -mno-xsaves -mno-avx512dq -mno-avx512bw -mno-avx512vl -mno-avx512ifma -mno-avx512vbmi -mno-avx5124fmaps -mno-avx5124vnniw -mno-clwb -mno-mwaitx -mno-clzero -mno-pku -mno-rdpid --param l1-cache-size=32 --param l1-cache-line-size=64 --param l2-cache-size=6144 -mtune=haswell -std=gnu99 -Wall -Wsign-compare -Wno-format-zero-length -frename-registers -fomit-frame-pointer -ggdb3 -fworking-directory -O3 -fstack-protector-strong -Wformat-security"
