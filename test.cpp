@@ -1,4 +1,4 @@
-#include <cassert>
+#include "test.hpp"
 
 void test() {
     assert(true);

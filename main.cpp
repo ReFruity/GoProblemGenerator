@@ -1,13 +1,16 @@
 #include <iostream>
 #include <string>
-#include "test.cpp"
+#include <vector>
+
+#include "test.hpp"
+#include "board.hpp"
 
 int main(int argc, char *argv[]) {
     test();
 
-    std::cout << "Hello world of Go!" << std::endl;
+    auto goBoard = GoBoard(9);
+
+    std::cout << goBoard << std::endl;
 
     return 0;
 }
-
-
