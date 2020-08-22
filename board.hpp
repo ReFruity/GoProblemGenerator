@@ -18,6 +18,8 @@ public:
     Node get(int x, int y) const;
 
     int getSize() const;
+
+    void set(int x, int y, Node node);
 };
 
 std::ostream& operator<<(std::ostream& strm, const GoBoard& goBoard);
