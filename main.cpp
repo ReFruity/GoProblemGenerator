@@ -1,8 +1,8 @@
 #include <iostream>
-//#include "test.cpp"
+#include "test.cpp"
 
 int main(int argc, char *argv[]) {
-//    test();
+    test();
 
     std::cout << "Hello world of Go!" << std::endl;
 
