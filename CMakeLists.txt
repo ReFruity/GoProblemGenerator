@@ -6,6 +6,24 @@ set(CMAKE_CXX_STANDARD 14)
 set(SOURCE_FILES main.cpp)
 add_executable(GoProblemGenerator ${SOURCE_FILES})
 
+target_include_directories(GoProblemGenerator PUBLIC pachi)
+target_include_directories(GoProblemGenerator PUBLIC pachi/engines)
+target_include_directories(GoProblemGenerator PUBLIC pachi/t-unit)
+target_include_directories(GoProblemGenerator PUBLIC pachi/uct)
+target_include_directories(GoProblemGenerator PUBLIC pachi/distributed)
+
+target_link_libraries(GoProblemGenerator PUBLIC pachi)
+target_link_libraries(GoProblemGenerator PUBLIC pachi/engines)
+target_link_libraries(GoProblemGenerator PUBLIC pachi/t-unit)
+target_link_libraries(GoProblemGenerator PUBLIC pachi/uct)
+target_link_libraries(GoProblemGenerator PUBLIC pachi/distributed)
+
+target_link_directories(GoProblemGenerator PUBLIC pachi)
+target_link_directories(GoProblemGenerator PUBLIC pachi/engines)
+target_link_directories(GoProblemGenerator PUBLIC pachi/t-unit)
+target_link_directories(GoProblemGenerator PUBLIC pachi/uct)
+target_link_directories(GoProblemGenerator PUBLIC pachi/distributed)
+#
 #find_package(fuego)
 #target_link_libraries(GoProblemGenerator fuego)
 

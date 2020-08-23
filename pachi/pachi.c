@@ -279,7 +279,7 @@ static struct option longopts[] = {
 	{ 0, 0, 0, 0 }
 };
 
-int main(int argc, char *argv[])
+int pachi_main(int argc, char *argv[])
 {
 	init();
 	

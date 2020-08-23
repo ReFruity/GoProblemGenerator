@@ -25,5 +25,8 @@ extern char *forced_ruleset;
 /* Don't pass first ? Needed when playing chinese rules on kgs or cleanup phase can be abused. */
 bool pachi_nopassfirst(struct board *b);
 
+//int pachi_main(int argc, char *argv[]);
+
+static void init();
 
 #endif
