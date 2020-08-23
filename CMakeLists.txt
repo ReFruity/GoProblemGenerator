@@ -47,3 +47,7 @@ target_link_libraries(GoProblemGenerator PUBLIC libfuego_gouct.a)
 target_include_directories(GoProblemGenerator PUBLIC "$ENV{FUEGO_DIR}/simpleplayers")
 target_link_directories(GoProblemGenerator PUBLIC "$ENV{FUEGO_DIR}/simpleplayers")
 target_link_libraries(GoProblemGenerator PUBLIC libfuego_simpleplayers.a)
+
+target_include_directories(GoProblemGenerator PUBLIC "$ENV{FUEGO_DIR}/gtpengine")
+target_link_directories(GoProblemGenerator PUBLIC "$ENV{FUEGO_DIR}/gtpengine")
+target_link_libraries(GoProblemGenerator PUBLIC libfuego_gtpengine.a)
