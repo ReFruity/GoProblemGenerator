@@ -3,5 +3,5 @@ project(GoProblemGenerator)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(SOURCE_FILES main.cpp board.hpp board.cpp test.hpp test.cpp)
+set(SOURCE_FILES main.cpp board.hpp board.cpp tree.hpp tree.cpp test.hpp test.cpp)
 add_executable(GoProblemGenerator ${SOURCE_FILES})
