@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(SOURCE_FILES main.cpp)
 add_executable(GoProblemGenerator ${SOURCE_FILES})
 
+set(CMAKE_CXX_FLAGS "-DNDEBUG")
+
 #find_package(fuego)
 #target_link_libraries(GoProblemGenerator fuego)
 
