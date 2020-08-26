@@ -3,7 +3,7 @@ project(GoProblemGenerator)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(SOURCE_FILES main.cpp)
+file(GLOB SOURCE_FILES src/*.cpp)
 add_executable(GoProblemGenerator ${SOURCE_FILES})
 
 set(CMAKE_CXX_FLAGS "-DNDEBUG")
