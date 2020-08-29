@@ -17,6 +17,8 @@
 #include <GoGtpCommandUtil.h>
 #include <SgStringUtil.h>
 #include <GoNodeUtil.h>
+#include <GoUctFeatures.h>
+#include <SgGameWriter.h>
 
 typedef GoUctPlayer<GoUctGlobalSearch<GoUctPlayoutPolicy<GoUctBoard>,
         GoUctPlayoutPolicyFactory<GoUctBoard> >,
@@ -34,7 +36,7 @@ std::string convertSgPointToString(SgPoint sgPoint) {
     return SgPointUtil::PointToString(sgPoint);
 }
 
-SgNode* loadSGF(std::string inputPath) {
+SgNode* importSGF(std::string inputPath) {
     std::ifstream in(inputPath.c_str());
     if (!in) {
         throw GtpFailure("could not open file");
@@ -45,6 +47,19 @@ SgNode* loadSGF(std::string inputPath) {
         throw GtpFailure("no games in file");
     }
     return root;
+}
+
+void exportSGF(SgNode *sgNode, const std::string &outputPath) {
+    try
+    {
+        std::ofstream out(outputPath.c_str());
+        SgGameWriter writer(out);
+        writer.WriteGame(*(sgNode->Root()), true, 0, 1, 19);
+    }
+    catch (const SgException& e)
+    {
+        throw GtpFailure(e.what());
+    }
 }
 
 GoBoard* convertSgNodeToGoBoard(SgNode *sgNode) {
@@ -65,6 +80,36 @@ GoSetup setupStones(SgNode *sgNode) {
     return GoSetup();
 }
 
+GoEvalArray<float> evaluateFeatures(const GoBoard &goBoard) {
+    FeFullBoardFeatures features(goBoard);
+    GoUctPlayoutPolicyParam policyParam;
+    GoUctPlayoutPolicy<GoBoard> policy(goBoard, policyParam);
+    GoUctFeatures::FindAllFeatures(goBoard, policy, features);
+    GoEvalArray<float> evalResult = features.EvaluateFeatures(FeFeatureWeights::ReadDefaultWeights());
+    std::cout << "Min value: " << evalResult.MinValue() << std::endl;
+    std::cout << "Max value: " << evalResult.MaxValue() << std::endl;
+    return evalResult;
+}
+
+SgUctTree generateProblem(SgNode* sgNodePtr) {
+    SgUctTree result;
+
+    result.CreateAllocators(1);
+    result.SetMaxNodes(5000000);
+
+    std::vector<SgUctMoveInfo> moves {10, 20, 30};
+    const SgUctNode& root = result.Root();
+    result.CreateChildren(0, root, moves);
+
+    return result;
+}
+
+GoGame* convertSgNodeToGoGame(SgNode *sgNode) {
+    auto goGame = new GoGame();
+    goGame->Init(sgNode);
+    return goGame;
+}
+
 int main(int argc, char *argv[]) {
     SgInit();
     GoInit();
@@ -72,21 +117,31 @@ int main(int argc, char *argv[]) {
     // goBoard.Play(convertStringToSgPoint("B3"));
     // std::cout << goBoard << std::endl;
 
-    SgNode *root = loadSGF("/Users/anton/SGF/test.sgf");
-    // auto boardSize = GoNodeUtil::GetBoardSize(root);
-    // std::cout << "LeftMostSon: " << root->LeftMostSon() << std::endl;
-    // std::cout << "Father: " << root->Father() << std::endl;
-    // std::cout << "boardSize: " << boardSize << std::endl;
-    // std::cout << "IsTerminal: " << root->IsTerminal() << std::endl;
-    // std::cout << "NumSons: " << root->NumSons() << std::endl;
+    std::string path1 = "/Users/anton/SGF/tsume-go-simple.sgf";
+    std::string path2 = "/Users/anton/Projects/fuego/regression/sgf/games/pro-9x9/mz1.sgf";
+    std::string path3 = "/Users/anton/SGF/test3.sgf";
+    std::string path4 = "/Users/anton/SGF/classic.sgf";
+    std::string outputPath = "/Users/anton/SGF/output.sgf";
 
-    while (root->HasSon()) {
-        root = root->NextDepthFirst();
-    }
+    SgNode* sgNode = importSGF(path4);
+    // auto boardSize = GoNodeUtil::GetBoardSize(sgNode);
+    // std::cout << "LeftMostSon: " << sgNode->LeftMostSon() << std::endl;
+    // std::cout << "Father: " << sgNode->Father() << std::endl;
+    // std::cout << "boardSize: " << boardSize << std::endl;
+    // std::cout << "IsTerminal: " << sgNode->IsTerminal() << std::endl;
+    // std::cout << "NumSons: " << sgNode->NumSons() << std::endl;
+
+    // while (sgNode->HasSon()) {
+    //     sgNode = sgNode->NextDepthFirst();
+    // }
+
+    SgNode* son = sgNode->NewLeftMostSon();
+    son->AddMoveProp(convertStringToSgPoint("A5"), SG_BLACK);
+    exportSGF(sgNode, outputPath);
 
     GoGame goGame;
-    goGame.Init(root);
-    std::cout << goGame.Board() << std::endl;
+    goGame.Init(sgNode);
+    // std::cout << goGame.Board() << std::endl;
 
     SgVector<SgPoint> blackVector;
     SgVector<SgPoint> whiteVector;
@@ -105,16 +160,15 @@ int main(int argc, char *argv[]) {
             default:
                 throw;
         }
-        if (goGame.Board().Occupied(*it)) {
-            std::cout << *it << " " << convertSgPointToString(*it) << " " << std::endl;
-        }
+        // if (goGame.Board().Occupied(*it)) {
+        //     std::cout << *it << " " << convertSgPointToString(*it) << " " << std::endl;
+        // }
     }
 
+    // auto next = sgNode->NextDepthFirst();
+    // auto nextNext = next->NextDepthFirst();
 
-    auto next = root->NextDepthFirst();
-    auto nextNext = next->NextDepthFirst();
-
-    auto move1 = SgPointUtil::PointToString(143);
+    auto move1 = SgPointUtil::PointToString(184);
 
     // whiteVector.PushBack(convertStringToSgPoint("C7"));
     // whiteVector.PushBack(convertStringToSgPoint("G7"));
@@ -123,10 +177,23 @@ int main(int argc, char *argv[]) {
     SgPointSet blackPointSet(blackVector);
     SgPointSet whitePointSet(whiteVector);
     SgBWSet sgBWSet(blackPointSet, whitePointSet);
-    GoSetup goSetup = setupStones(root);
+    // GoSetup goSetup = setupStones(sgNode);
+    GoSetup goSetup;
     goSetup.m_stones = sgBWSet;
-    auto goBoardPtr = convertSgNodeToGoBoard(root);
+    goSetup.m_player = SG_BLACK;
+    // auto goBoardPtr = convertSgNodeToGoBoard(sgNode);
     GoBoard goBoard(9, goSetup);
+
+    SgUctTree problem = generateProblem(sgNode);
+    auto problemRoot = problem.Root();
+    auto child = problemRoot.FirstChild()->FirstChild();
+
+    auto evaluationResult = GoBoardUtil::ScoreSimpleEndPosition(goBoard, 0.5);
+    auto japaneseScore = GoBoardUtil::JapaneseScore(goBoard, 0);
+    for (int i = 0; i < goBoard.CapturedStones().Length(); i++) {
+        std::cout << goBoard.CapturedStones()[i] << " " << std::endl;
+    }
+    std::cout << "Evaluation result: " << japaneseScore << std::endl;
 
     GoUctGlobalSearch<GoUctPlayoutPolicy<GoUctBoard>,
             GoUctPlayoutPolicyFactory<GoUctBoard>> goUctGlobalSearch(
@@ -155,6 +222,8 @@ int main(int argc, char *argv[]) {
     };
     goUctGlobalSearch.Search(maxGames, maxTime, sequence, rootFilter, initTree, param);
 
+    std::cout << goBoard << std::endl;
+
     for (int sgMove : sequence) {
         std::cout << convertSgPointToString(sgMove) << std::endl;
         std::cout << goBoard << std::endl;
@@ -163,8 +232,9 @@ int main(int argc, char *argv[]) {
 
     std::cout << goBoard << std::endl;
 
+
     // GoGame goGame;
-    // goGame.Init(root);
+    // goGame.Init(sgNode);
 
     // GoGtpEngine engine(9, argv[0], false);
     // GoGtpAssertionHandler assertionHandler(engine);
