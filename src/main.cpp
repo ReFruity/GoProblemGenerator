@@ -19,12 +19,14 @@
 #include <GoNodeUtil.h>
 #include <GoUctFeatures.h>
 #include <SgGameWriter.h>
+#include <queue>
 
 typedef GoUctPlayer<GoUctGlobalSearch<GoUctPlayoutPolicy<GoUctBoard>,
         GoUctPlayoutPolicyFactory<GoUctBoard> >,
         GoUctGlobalSearchState<GoUctPlayoutPolicy<GoUctBoard> > >
         PlayerType;
 
+// TODO: Convert string to SgMove instead
 SgPoint convertStringToSgPoint(std::string move) {
     std::istringstream in(move);
     SgPoint p;
@@ -62,12 +64,6 @@ void exportSGF(SgNode *sgNode, const std::string &outputPath) {
     }
 }
 
-GoBoard* convertSgNodeToGoBoard(SgNode *sgNode) {
-    auto result = new GoBoard(9);
-
-    return result;
-}
-
 GoSetup setupStones(SgNode *sgNode) {
     SgNode* current = sgNode;
     while (current->NumSons() > 0) {
@@ -103,11 +99,89 @@ SgUctTree generateProblem(SgNode* sgNodePtr) {
 
     return result;
 }
-
 GoGame* convertSgNodeToGoGame(SgNode *sgNode) {
     auto goGame = new GoGame();
     goGame->Init(sgNode);
     return goGame;
+}
+
+GoBoard* convertSgNodeToGoBoard(SgNode *sgNode) {
+    auto goGamePtr = convertSgNodeToGoGame(sgNode);
+
+    SgVector<SgPoint> blackVector;
+    SgVector<SgPoint> whiteVector;
+
+    for (GoBoard::Iterator it(goGamePtr->Board()); it; ++it)
+    {
+        switch (goGamePtr->Board().GetColor(*it)) {
+            case SG_BLACK:
+                blackVector.PushBack(*it);
+                break;
+            case SG_WHITE:
+                whiteVector.PushBack(*it);
+                break;
+            case SG_EMPTY:
+                break;
+            default:
+                throw;
+        }
+        // if (goGame.Board().Occupied(*it)) {
+        //     std::cout << *it << " " << convertSgPointToString(*it) << " " << std::endl;
+        // }
+    }
+
+    SgPointSet blackPointSet(blackVector);
+    SgPointSet whitePointSet(whiteVector);
+    SgBWSet sgBWSet(blackPointSet, whitePointSet);
+    // GoSetup goSetup = setupStones(sgNode);
+    GoSetup goSetup;
+    goSetup.m_stones = sgBWSet;
+    goSetup.m_player = SG_BLACK;
+    // auto goBoardPtr = convertSgNodeToGoBoard(sgNode);
+
+    return new GoBoard(9, goSetup);
+}
+
+void generateGameTree(SgNode* root, const std::vector<std::string> &allowedMoves) {
+    std::vector<SgMove> allowedSgMoves;
+
+    allowedSgMoves.reserve(allowedMoves.size());
+
+    for (const auto &move : allowedMoves) {
+        allowedSgMoves.push_back(convertStringToSgPoint(move));
+    }
+
+    std::queue<SgNode*> queue;
+    queue.push(root);
+    SgBlackWhite currentPlayer = SG_BLACK;
+
+    while (!queue.empty()) {
+        std::set<SgMove> exploredMoves;
+        SgNode *currentSgNode = queue.front();
+        queue.pop();
+        auto goBoard = convertSgNodeToGoBoard(currentSgNode);
+
+        std::cout << *goBoard << std::endl;
+
+        for (const auto &sgMove : allowedSgMoves) {
+            if (exploredMoves.count(sgMove) > 0) {
+                continue;
+            }
+
+            // goBoard->Play(sgMove);
+            // bool isFirstStone = goBoard->IsFirst(sgMove);
+            // bool isNewPosition = goBoard->IsNewPosition();
+            // TODO: && !goBoard->CheckKo(currentPlayer)
+            // if (!isFirstStone && !isNewPosition) {
+            //     continue;
+            // }
+
+            exploredMoves.insert(sgMove);
+            SgNode *son = currentSgNode->NewLeftMostSon();
+            son->AddMoveProp(sgMove, currentPlayer);
+            queue.push(son);
+        }
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -124,6 +198,9 @@ int main(int argc, char *argv[]) {
     std::string outputPath = "/Users/anton/SGF/output.sgf";
 
     SgNode* sgNode = importSGF(path4);
+    generateGameTree(sgNode, {"E5", "F5", "G5", "E4", "G4"});
+    exportSGF(sgNode, outputPath);
+
     // auto boardSize = GoNodeUtil::GetBoardSize(sgNode);
     // std::cout << "LeftMostSon: " << sgNode->LeftMostSon() << std::endl;
     // std::cout << "Father: " << sgNode->Father() << std::endl;
@@ -135,9 +212,9 @@ int main(int argc, char *argv[]) {
     //     sgNode = sgNode->NextDepthFirst();
     // }
 
-    SgNode* son = sgNode->NewLeftMostSon();
-    son->AddMoveProp(convertStringToSgPoint("A5"), SG_BLACK);
-    exportSGF(sgNode, outputPath);
+    // SgNode* son = sgNode->NewLeftMostSon();
+    // son->AddMoveProp(convertStringToSgPoint("A5"), SG_BLACK);
+    // exportSGF(sgNode, outputPath);
 
     GoGame goGame;
     goGame.Init(sgNode);
